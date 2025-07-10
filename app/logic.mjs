@@ -25,7 +25,7 @@ export async function generateProof(input) {
     return {proof, publicSignals};
 }
 
-export async function verify(proof, ps) {
+export async function verify(p, ps) {
     //const vKey = JSON.parse(fs.readFileSync("../verification_key.json"));
     //const proof = JSON.parse(fs.readFileSync("../proof.json"));
     //const publicSignals = JSON.parse(fs.readFileSync("../public.json"));
@@ -33,7 +33,7 @@ export async function verify(proof, ps) {
     const vKeyResponse = await fetch("/verification_key.json");
     const vKey = await vKeyResponse.json();
 
-    return await snarkjs.groth16.verify(vKey, ps, proof);
+    return await snarkjs.groth16.verify(vKey, ps, p);
 }
 
 export function downloadProofJson(proof, publicSignals) {

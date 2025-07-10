@@ -9,7 +9,7 @@ const range = (begin, end) => [...Array(end - begin).keys()].map(idx => idx + be
 
 function App() {
 
-  const proof = async () => {
+  const proofFunc = async () => {
     const today = new Date().valueOf();
     const given = new Date(year, possibleMonths.indexOf(month), day).valueOf();
     if (today < given) {
@@ -23,18 +23,23 @@ function App() {
 
     const {proof, publicSignals} = await generateProof(inp);
     //downloadProofJson(proof, publicSignals);
+    
     console.log('proof:', proof);
     console.log(publicSignals); // <-- Add this!
     addLog("Proof generated");
     const res = await verify(proof, publicSignals);
     addLog(res ? "Proof verified!" : "Proof falsified!");
-    setProofOkay(publicSignals[0] === "1" ? true : false);
+    setProofOkay(publicSignals[0] === "1" ? 1 : 2);
+    setProofJson(proof);
+    setPublicSignalsJson(publicSignals);
   }
 
   const [log, setLog] = useState([""]);
   const addLog = (msg) => setLog(prev => [...prev, msg]);
 
-  const [proofOkay, setProofOkay] = useState("Proof not yet generated");
+  const [proofOkay, setProofOkay] = useState(0);
+  const [proofJson, setProofJson] = useState(null);
+  const [publicSignalsJson, setPublicSignalsJson] = useState(null);
 
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
@@ -52,7 +57,7 @@ function App() {
       <div className='center'>
         <div className='input-section'>
           <h3 className='text'>Enter date of birth:</h3>
-          <form className='form' onSubmit={(e) => {e.preventDefault(); proof();}}>
+          <form className='form' onSubmit={(e) => {e.preventDefault(); proofFunc();}}>
             <div className='input-row'>
               <h4 className='text'>Enter year:</h4>
               <select className='select' value={year} onChange={(e) => setYear(e.target.value)}>
@@ -85,8 +90,18 @@ function App() {
             </div>
               <div className='actual-output'>
                 <div className='bold-text'>Output</div>
-                <div className='proof-output'>{`Proof status: ${proofOkay ? "Age verified!" : "Not old enough!"}`}</div>
-                {proofOkay ? <div className='text'>Proof result:</div> : <></>}
+                <div className='proof-output'>Proof result:</div>
+                <div className={`proof-output-text-${!proofJson ? "0" : proofOkay ? "1" : "2"}`}>
+                  {`${!proofJson ? "No proof yet!" : proofOkay ? "Age verified!" : "Not old enough!"}`}
+                </div>
+                {proofOkay !== 0 ? (
+                  <div className='text'>Proof JSON:
+                    <button type="button" className='btn'
+                    onClick={() => downloadProofJson(proofJson, publicSignalsJson)}
+                    >Download proof JSON</button>
+                  </div>
+                 ) : <></>}
+
               </div>
             </div>
           </div>
